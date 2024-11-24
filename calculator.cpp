@@ -1,60 +1,63 @@
-#include <getopt.h>
-#include <stdio.h>
 #include <iostream>
 #include <cmath>
+#include <cstdlib>
 
-using namespace std;
+void printUsage() {
+    std::cout << "Использование:\n";
+    std::cout << "  calculator -o circle <радиус>\n";
+    std::cout << "  calculator -o triangle <сторона1> <сторона2> <сторона3>\n";
+}
 
-int main(int argc, char **argv) {
-    int opt;
-    
-     if(argc == 1) { 
-        cout << "Калькулятор, который выполняет умножение и деление" << endl;
-        cout << "Для опции -op есть два возможных значения: mul (умножение) и div (деление)" << endl;
-        cout << "Пример ./имя_файла -op mul 3 4" << endl;
-        return 0;
+double calculateCircleArea(double radius) {
+    return M_PI * radius * radius;
+}
+
+double calculateTriangleArea(double a, double b, double c) {
+    double s = (a + b + c) / 2; // Полупериметр
+    return std::sqrt(s * (s - a) * (s - b) * (s - c)); // Площадь по формуле Герона
+}
+
+int main(int argc, char* argv[]) {
+    if (argc < 3) {
+        printUsage();
+        return 1;
     }
-    
-    double x = 0;
-    double y = 0;
-    double z = 0;
-    double w = 0;
-    
-    while((opt = getopt(argc, argv, "o:p:")) != -1) { 
-        switch(opt) {
-            case 'o':
-                string type = string(optarg);
-                x = atof(argv[3]);
-                y = atof(argv[4]);
-                z = atof(argv[5]);
-                w = atof(argv[6]);
-                if (type == "m") {
-                    double result = x * y * z * w;
-                    cout << "Умножение: " << result << endl;
-                }
-                else if (type == "d") {
-                    if (y!= 0) {
-                        double result = (x / y)/(z / w);
-                        cout << "Деление: " << result << endl;
-                    }
-                    else if (argc == 5) {
-                    double result = (x / y) / z;
-                    cout << result << endl;
-                    }
-                    else if (argc == 6) {
-                    double result = ((x / y) / z) / w;
-                    cout << result << endl;}
-                    else {
-                        cout << "Невозможно выполнить деление на ноль" << endl;
-                        return 0;
-                    }
-                }
-                else {
-                    cout << "Неизвестная операция" << endl;
-                    return 0;
-                }
-                break;
+
+    std::string operation = argv[1];
+    if (operation == "-o" || operation == "--operation") {
+        std::string shape = argv[2];
+
+        if (shape == "circle") {
+            if (argc != 4) {
+                std::cerr << "Для площади круга требуется один параметр (радиус).\n";
+                return 1;
+            }
+            double radius = std::atof(argv[3]);
+            double area = calculateCircleArea(radius);
+            std::cout << "Площадь круга с радиусом " << radius << " равна " << area << ".\n";
+        } 
+        else if (shape == "triangle") {
+            if (argc != 6) {
+                std::cerr << "Для площади треугольника требуется три параметра (стороны).\n";
+                return 1;
+            }
+            double a = std::atof(argv[3]);
+            double b = std::atof(argv[4]);
+            double c = std::atof(argv[5]);
+            double area = calculateTriangleArea(a, b, c);
+            std::cout << "Площадь треугольника со сторонами " << a << ", " << b << " и " << c << " равна " << area << ".\n";
+        } 
+        else {
+            std::cerr << "Неизвестная операция: " << shape << ".\n";
+            printUsage();
+            return 1;
         }
+    } 
+    else {
+        std::cerr << "Неизвестный флаг: " << operation << ".\n";
+        printUsage();
+        return 1;
     }
+
     return 0;
 }
